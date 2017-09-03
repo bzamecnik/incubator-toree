@@ -39,7 +39,14 @@ object Dependencies {
   val ivy = "org.apache.ivy" % "ivy" % "2.4.0" // Apache v2
 
   // use the same jackson version in test than the one provided at runtime by Spark 2.0.0
-  val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.5" // Apache v2
+  // OVERRIDE: (almost) latest Jackson for url-patterns (they need 2.7+, 2.6.5 is incompatible)
+  val jacksonVersion = "2.8.9"
+  val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion // Apache v2
+  // from a strange reason without this explicit dependency it takes 2.8.0, WTF?
+  val jacksonAnnotations = "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion // Apache v2
+  // also override Jackson modules
+  val jacksonModuleScala = "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
+  val jacksonModuleParanamer = "com.fasterxml.jackson.module" % "jackson-module-paranamer" % jacksonVersion
 
   val jeroMq = "org.zeromq" % "jeromq" % "0.3.6" // MPL v2
 
@@ -78,13 +85,21 @@ object Dependencies {
         ExclusionRule(
           organization = "org.jboss.netty",
           name = "netty"
+        ),
+        ExclusionRule(
+          organization = "com.fasterxml.jackson.core"
         )
       ),
       sparkGraphX.value % "provided",
       sparkMllib.value % "provided",
       sparkRepl.value % "provided",
       sparkSql.value % "provided",
-      sparkStreaming.value % "provided"
+      sparkStreaming.value % "provided",
+      // overriden version of Jackson
+      jacksonDatabind,
+      jacksonAnnotations,
+      jacksonModuleScala,
+      jacksonModuleParanamer
     )
   }
 
